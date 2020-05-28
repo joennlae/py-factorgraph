@@ -45,6 +45,10 @@ import code  # code.interact(local=dict(globals(), **locals()))
 import logging
 import signal
 
+import sys
+if sys.version_info.major == 3:
+    unicode = str
+
 # 3rd party
 import numpy as np
 
@@ -196,7 +200,7 @@ class Graph(object):
             int number removed
         '''
         removed = 0
-        names = self._rvs.keys()
+        names = list(self._rvs.keys())
         for name in names:
             if self._rvs[name].n_edges() == 0:
                 self._rvs[name].meta['pruned'] = True
@@ -288,12 +292,12 @@ class Graph(object):
             assert len(x) == len(self._rvs)
 
             # check that each assignment is valid (->)
-            for name, label in x.iteritems():
+            for name, label in x.items():
                 assert name in self._rvs
                 assert self._rvs[name].has_label(label)
 
             # check that each RV has a valid assignment (<-)
-            for name, rv in self._rvs.iteritems():
+            for name, rv in self._rvs.items():
                 assert name in x
                 assert rv.has_label(x[name])
 
@@ -320,7 +324,7 @@ class Graph(object):
         Returns:
             ({str: int}, float)
         '''
-        return self._bf_bj_recurse({}, self._rvs.values())
+        return self._bf_bj_recurse({}, list(self._rvs.values()))
 
     def _bf_bj_recurse(self, assigned, todo):
         '''
@@ -412,7 +416,7 @@ class Graph(object):
         Returns
             [RV|Factor] sorted by # edges
         '''
-        rvs = self._rvs.values()
+        rvs = list(self._rvs.values())
         facs = self._factors
         nodes = rvs + facs
         return sorted(nodes, key=lambda x: x.n_edges())
@@ -430,7 +434,7 @@ class Graph(object):
             n.init_lbp()
 
     def print_sorted_nodes(self):
-        print self._sorted_nodes()
+        print((self._sorted_nodes()))
 
     def print_messages(self, nodes=None):
         '''
@@ -441,7 +445,7 @@ class Graph(object):
         '''
         if nodes is None:
             nodes = self._sorted_nodes()
-        print 'Current outgoing messages:'
+        print('Current outgoing messages:')
         for n in nodes:
             n.print_messages()
 
@@ -462,7 +466,7 @@ class Graph(object):
             [(RV, np.ndarray)]
         '''
         if rvs is None:
-            rvs = self._rvs.values()
+            rvs = list(self._rvs.values())
 
         tuples = []
         for rv in rvs:
@@ -472,7 +476,7 @@ class Graph(object):
             if normalize:
                 marg /= sum(marg)
 
-            tuples += [(rv, marg)]
+            tuples += [(rv.name, marg)]
         return tuples
 
     def print_rv_marginals(self, rvs=None, normalize=False):
@@ -493,19 +497,19 @@ class Graph(object):
         if normalize:
             disp += ' (normalized)'
         disp += ':'
-        print disp
+        print(disp)
 
         # Extract
         tuples = self.rv_marginals(rvs, normalize)
 
         # Display
         for rv, marg in tuples:
-            print str(rv)
-            vals = range(rv.n_opts)
+            print((str(rv)))
+            vals = list(range(rv.n_opts))
             if len(rv.labels) > 0:
                 vals = rv.labels
             for i in range(len(vals)):
-                print '\t', vals[i], '\t', marg[i]
+                print(('\t', vals[i], '\t', marg[i]))
 
     def debug_stats(self):
         logger.debug('Graph stats:')
@@ -582,7 +586,7 @@ class RV(object):
         Displays the current outgoing messages for this RV.
         '''
         for i, f in enumerate(self._factors):
-            print '\t', self, '->', f, '\t', self._outgoing[i]
+            print(('\t', self, '->', f, '\t', self._outgoing[i]))
 
     def recompute_outgoing(self, normalize=False):
         '''
@@ -868,7 +872,7 @@ class Factor(object):
 
         # Divide out individual belief and (Sum:) add for marginal.
         convg = True
-        all_idx = range(len(belief.shape))
+        all_idx = list(range(len(belief.shape)))
         for i, rv in enumerate(self._rvs):
             rv_belief = divide_safezero(belief, incoming[i])
             axes = tuple(all_idx[:i] + all_idx[i+1:])
@@ -889,7 +893,7 @@ class Factor(object):
         Displays the current outgoing messages for this Factor.
         '''
         for i, rv in enumerate(self._rvs):
-            print '\t', self, '->', rv, '\t', self._outgoing[i]
+            print(('\t', self, '->', rv, '\t', self._outgoing[i]))
 
     def attach(self, rv):
         '''
