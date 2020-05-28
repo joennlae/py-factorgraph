@@ -45,13 +45,12 @@ import code  # code.interact(local=dict(globals(), **locals()))
 import logging
 import signal
 
-import sys
-if sys.version_info.major == 3:
-    unicode = str
-
 # 3rd party
 import numpy as np
 
+import sys
+if sys.version_info.major == 3:
+    unicode = str
 
 # Constants
 # -----------------------------------------------------------------------------

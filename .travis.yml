@@ -5,9 +5,10 @@ python:
 install:
   - pip install .
 before_script:
-  - pip install pep8 pytest-cov coveralls
+  - pip install pycodestyle pytest-cov coveralls
 script:
-  - pep8 factorgraph/ tests/
+  - pycodestyle factorgraph/ tests/
   - py.test --cov=factorgraph tests/
 after_success:
   - coveralls
+
